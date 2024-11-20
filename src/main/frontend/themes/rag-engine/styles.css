@@ -1,0 +1,8 @@
+@import url('@fontsource/libre-franklin/index.css');    html {
+--lumo-font-family: Libre Franklin;
+
+    }
+
+    [theme~="dark"] {
+
+    }

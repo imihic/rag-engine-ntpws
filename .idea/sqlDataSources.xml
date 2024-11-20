@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DdlMappings">
+    <mapping uuid="4b5aebf4-b6f1-45ad-9875-14a241a9322a" name="comai@10.201.24.11 Mapping">
+      <data-sources db="35f66ad9-f7be-45f8-8017-85e88b43e5e2" ddl="b2dc10b0-627c-43e2-94af-069b0cd78770" />
+      <scope>
+        <node kind="database" qname="comai">
+          <node kind="schema" qname="rag_engine" />
+        </node>
+      </scope>
+    </mapping>
+  </component>
+  <component name="SqlDataSourceStorage">
+    <option name="dataSources">
+      <list>
+        <State>
+          <option name="id" value="b2dc10b0-627c-43e2-94af-069b0cd78770" />
+          <option name="name" value="comai@10.201.24.11 (DDL)" />
+          <option name="dbmsName" value="POSTGRES" />
+          <option name="urls">
+            <array>
+              <option value="file://$PROJECT_DIR$/src/main/resources/data.sql" />
+            </array>
+          </option>
+          <option name="outLayout" value="File per object by schema.groovy" />
+        </State>
+      </list>
+    </option>
+  </component>
+</project>

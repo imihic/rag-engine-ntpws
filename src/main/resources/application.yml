@@ -1,0 +1,9 @@
+application:
+  name: RAGEngine
+pipelines:
+  pipelineDefinitions:
+    documentIngestionPipeline:
+      jobType: hr.combis.application.pipelines.jobs.DocumentProcessingJob
+      stages:
+        - documentParsingPipelineStage
+        - semanticSplittingPipelineStage
