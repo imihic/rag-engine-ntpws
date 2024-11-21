@@ -8,6 +8,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 
@@ -124,11 +125,22 @@ public class SemanticDocumentSplitter implements DocumentSplitter {
     }
 
     private SentenceDetectorME createSentenceDetector() {
+        /*
         try (InputStream modelIn = getClass().getResourceAsStream("/models/hr-sent.bin")) {
             SentenceModel model = new SentenceModel(modelIn);
             return new SentenceDetectorME(model);
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the Croatian sentence model", e);
+        }
+        */
+        // Absolute path to the model file
+        String modelPath = "/home/imihic/Documents/rag-engine/src/main/resources/models/hr-sent.bin";
+
+        try (InputStream modelIn = new FileInputStream(modelPath)) {
+            SentenceModel model = new SentenceModel(modelIn);
+            return new SentenceDetectorME(model);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load the Croatian sentence model from path: " + modelPath, e);
         }
     }
 

@@ -1,4 +1,4 @@
-package hr.combis.application.service;
+package hr.combis.application.services;
 
 import hr.combis.application.data.model.Chat;
 import hr.combis.application.data.model.Message;
@@ -6,6 +6,8 @@ import hr.combis.application.data.model.SenderType;
 import hr.combis.application.data.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -23,5 +25,9 @@ public class MessageService {
         message.setSender(sender);
         message.setContent(content);
         return messageRepository.save(message);
+    }
+
+    public List<Message> getMessagesByChat(Chat chat) {
+        return messageRepository.findByChatOrderByTimestampAsc(chat);
     }
 }

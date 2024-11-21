@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,6 +41,20 @@ public class UserService {
 
     public int count() {
         return (int) repository.count();
+    }
+
+    public Optional<User> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    public List<User> getAllUsers() {
+        return repository.findAll();
+    }
+
+    public void setUserAccess(String userId, boolean enabled) {
+        User user = repository.findById(Long.valueOf(userId)).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setEnabled(enabled);
+        repository.save(user);
     }
 
 }

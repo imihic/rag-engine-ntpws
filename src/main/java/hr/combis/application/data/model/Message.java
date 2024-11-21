@@ -18,7 +18,6 @@ public class Message extends AbstractEntity {
 
     @Lob
     @Column(length = 1000000)
-    @JsonIgnore // Ignore LOB field during serialization
     private String content;
 
     private LocalDateTime timestamp;

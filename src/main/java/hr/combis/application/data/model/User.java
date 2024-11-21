@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.BatchSize;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +27,9 @@ public class User extends AbstractEntity {
     @BatchSize(size = 10)
     @JsonManagedReference
     private Set<Chat> chats;
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DocumentSegment> segments = new ArrayList<>();
+    private boolean enabled;
 
     public Set<Chat> getChats() {return chats;}
     public void setChats(Set<Chat> chats) {this.chats = chats;}
@@ -61,4 +64,10 @@ public class User extends AbstractEntity {
         this.profilePicture = profilePicture;
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+    public boolean getEnabled() {
+        return enabled;
+    }
 }

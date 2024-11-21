@@ -6,3 +6,41 @@
     [theme~="dark"] {
 
     }
+
+.virtual-list {
+    box-shadow: var(--lumo-box-shadow-xs);
+    background-color: var(--lumo-shade-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.chat-item {
+    padding: var(--lumo-space-s);
+    cursor: pointer;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    min-height: 60px;
+}
+
+.chat-item:hover {
+    background-color: var(--lumo-contrast-10pct);
+}
+
+.chat-item.active {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.chat-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-item-timestamp {
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-secondary-text-color);
+}
+
+.chat-item-message-count {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}

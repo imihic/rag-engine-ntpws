@@ -4,15 +4,21 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.Endpoint;
 import hr.combis.application.data.model.User;
 import hr.combis.application.security.AuthenticatedUser;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
 
 @Endpoint
 @AnonymousAllowed
 public class UserEndpoint {
+
+    @Autowired
+    private UserService userService;
+
 
     @Autowired
     private AuthenticatedUser authenticatedUser;
@@ -32,4 +38,20 @@ public class UserEndpoint {
 
         return user;
     }
+
+    @Transactional
+    public Optional<Long> getAuthenticatedUserId() {
+        return authenticatedUser.get().map(User::getId);
+    }
+
+    @RolesAllowed("ADMIN")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @RolesAllowed("ADMIN")
+    public void setUserAccess(String userId, boolean enabled) {
+        userService.setUserAccess(userId, enabled);
+    }
+
 }

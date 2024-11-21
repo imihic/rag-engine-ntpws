@@ -3,9 +3,15 @@ package hr.combis.application.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.segment.TextSegment;
 import hr.combis.application.api.dto.SegmentData;
+import hr.combis.application.data.model.DocumentSegment;
+import hr.combis.application.data.model.User;
 import hr.combis.application.pipelines.PipelineExecutor;
 import hr.combis.application.pipelines.PipelineFactory;
 import hr.combis.application.pipelines.jobs.DocumentProcessingJob;
+import hr.combis.application.pipelines.util.models.BgeM3EmbeddingModel;
+import hr.combis.application.security.AuthenticatedUser;
+import hr.combis.application.services.DocumentSegmentService;
+import hr.combis.application.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +28,21 @@ import java.util.stream.Collectors;
 public class DocumentProcessingService {
 
     private final PipelineFactory pipelineFactory;
+    private final DocumentSegmentService documentSegmentService;
+    private final UserService userService; // Assuming UserService exists to fetch user by ID
 
-    public String processDocument(MultipartFile file) {
+    public String processDocument(MultipartFile file, Long userId) {
         try {
-            log.info("Starting document processing for file: {}", file.getOriginalFilename());
+            log.debug("Starting document processing for file: {}", file.getOriginalFilename());
 
             // Convert the MultipartFile to a byte array
             byte[] fileBytes = file.getBytes();
+
+            // Fetch the user using the user ID
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            log.debug("Processing document for user: {}", user.getId());
 
             // Create a DocumentProcessingJob
             DocumentProcessingJob job = new DocumentProcessingJob(1L, fileBytes);
@@ -38,27 +52,16 @@ public class DocumentProcessingService {
 
             // Execute the pipeline
             executor.execute(job);
-            log.info("Document processing completed for file: {}", file.getOriginalFilename());
+            log.debug("Document processing completed for file: {}", file.getOriginalFilename());
 
-            // Log each segment's text
-            for (TextSegment segment : job.getSegments()) {
-                log.info("Segment: {}", segment.text());
-            }
-
-            // Collect segments' text into a list of strings
-            // Extract the text from each TextSegment
-            // Return the list of segment texts
-            // Collect segments' text and metadata into a list of SegmentData objects
-            List<SegmentData> segmentDataList = job.getSegments().stream()
-                    .map(segment -> new SegmentData(segment.text(), segment.metadata().asMap()))
+            // Save segments to the database
+            List<DocumentSegment> segments = job.getSegments().stream()
+                    .map(segment -> convertToEntity(segment, user))
                     .collect(Collectors.toList());
 
-// Convert the list to a JSON string
-            String json = getSegmentsAsJson(segmentDataList);
+            documentSegmentService.saveAll(segments);
 
-// Log or return the JSON string
-            log.info("Segments JSON: {}", json);
-            return json;
+            return "Document processed and segments saved successfully.";
         } catch (IOException e) {
             log.error("Error reading file: {}", e.getMessage(), e);
         } catch (Exception e) {
@@ -67,29 +70,21 @@ public class DocumentProcessingService {
         return null;
     }
 
+    private DocumentSegment convertToEntity(TextSegment segment, User user) {
+        DocumentSegment entity = new DocumentSegment();
+        entity.setDocumentId(segment.metadata().get("document_id"));
+        entity.setText(segment.text());
+        entity.setMetadata(segment.metadata().asMap());
+        entity.setUser(user);
 
-    // Method to convert segment data to JSON
-    public String getSegmentsAsJson(List<SegmentData> segmentDataList) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(segmentDataList);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert segments to JSON", e);
-        }
-    }
+        // Compute embedding and set it
+        float[] embedding = BgeM3EmbeddingModel.getInstance()
+                .embed(segment.text())
+                .content()
+                .vector();
 
-    // Modified code to collect and convert segments
-    public String collectAndConvertSegments(DocumentProcessingJob job) {
-        // Collect segments' text and metadata into a list of SegmentData objects
-        List<SegmentData> segmentDataList = job.getSegments().stream()
-                .map(segment -> new SegmentData(segment.text(), segment.metadata().asMap()))
-                .collect(Collectors.toList());
+        entity.setEmbedding(embedding);
 
-        // Convert the list to a JSON string
-        String json = getSegmentsAsJson(segmentDataList);
-
-        // Log or return the JSON string
-        log.info("Segments JSON: {}", json);
-        return json;
+        return entity;
     }
 }
