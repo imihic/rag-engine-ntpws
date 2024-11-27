@@ -1,4 +1,4 @@
-package hr.combis.application.llm.config;
+package hr.combis.application.config;
 
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +16,10 @@ public class OpenAiModelConfig {
         return OpenAiChatModel.builder()
                 .apiKey(OPENAI_API_KEY)
                 .modelName("gpt-4o-mini")
-                .temperature(0.7)
+                .temperature(0.1)
                 .build();
     }
+
 
     @Bean
     public OpenAiChatModel tritonModel() {

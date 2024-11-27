@@ -4,12 +4,14 @@ import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentParser;
 import hr.combis.application.pipelines.jobs.DocumentProcessingJob;
 import hr.combis.application.pipelines.util.parsers.ApacheTikaDocumentParser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @Component("documentParsingPipelineStage")
+@Slf4j
 public class DocumentParsingPipelineStage extends AbstractPipelineStage<DocumentProcessingJob> {
 
 

@@ -13,8 +13,10 @@ public class DocumentProcessingJob implements ProcessingJob {
 
     private Long id;
     private int status;
+    private String documentId;
     private String documentContent;
-    private byte[] fileBytes; // Field to store file bytes
+    private byte[] fileBytes;
+    private List<TextSegment> sentences = new ArrayList<>();
     private List<TextSegment> segments = new ArrayList<>();
 
     public DocumentProcessingJob(Long id, byte[] fileBytes) {
@@ -35,6 +37,14 @@ public class DocumentProcessingJob implements ProcessingJob {
     @Override
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public void addSentence(TextSegment sentence) {
+        this.sentences.add(sentence);
+    }
+
+    public void addSentences(List<TextSegment> sentences) {
+        this.sentences.addAll(sentences);
     }
 
     public void addSegment(TextSegment segment) {

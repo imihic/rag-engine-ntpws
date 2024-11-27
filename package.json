@@ -30,6 +30,7 @@
     "proj4": "2.12.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-i18next": "^15.1.2",
     "react-router-dom": "6.26.2",
     "recharts": "^2.13.3"
   },
@@ -105,7 +106,8 @@
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
-    "recharts": "$recharts"
+    "recharts": "$recharts",
+    "react-i18next": "$react-i18next"
   },
   "vaadin": {
     "dependencies": {
@@ -168,6 +170,6 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "db322382831ae82320039918020b650320afcc8e59ec592aeef4083c9351c7a7"
+    "hash": "44af8440ed71644f539a76f4e7de0c0f71bbfcb3e2751816ba956ebbe7176b9a"
   }
 }

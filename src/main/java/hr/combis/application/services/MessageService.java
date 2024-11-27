@@ -4,12 +4,14 @@ import hr.combis.application.data.model.Chat;
 import hr.combis.application.data.model.Message;
 import hr.combis.application.data.model.SenderType;
 import hr.combis.application.data.repository.MessageRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class MessageService {
 
     private final MessageRepository messageRepository;

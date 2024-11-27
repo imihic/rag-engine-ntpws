@@ -1,4 +1,4 @@
-package hr.combis.application.llm.service;
+package hr.combis.application.services;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
@@ -8,17 +8,11 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
-import hr.combis.application.data.model.Chat;
-import hr.combis.application.data.model.DocumentSegment;
-import hr.combis.application.data.model.SenderType;
-import hr.combis.application.data.model.User;
+import hr.combis.application.data.model.*;
 import hr.combis.application.pipelines.util.models.BgeM3EmbeddingModel;
 import hr.combis.application.security.AuthenticatedUser;
-import hr.combis.application.services.ChatService;
-import hr.combis.application.services.DocumentSegmentService;
-import hr.combis.application.services.MessageService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -33,19 +27,19 @@ public class AiService {
 
     private final ChatService chatService;
     private final MessageService messageService;
-    private final DocumentSegmentService documentSegmentService;
+    private final ChunkService chunkService;
     private final AuthenticatedUser authenticatedUser;
 
-    private Assistant assistant;
-    private StreamingAssistant streamingAssistant;
+    @Autowired
+    private UserService userService;
 
     @Value("${openai.api.key}")
     private String OPENAI_API_KEY;
 
-    public AiService(ChatService chatService, MessageService messageService, DocumentSegmentService documentSegmentService, AuthenticatedUser authenticatedUser) {
+    public AiService(ChatService chatService, MessageService messageService, ChunkService chunkService, AuthenticatedUser authenticatedUser) {
         this.chatService = chatService;
         this.messageService = messageService;
-        this.documentSegmentService = documentSegmentService;
+        this.chunkService = chunkService;
         this.authenticatedUser = authenticatedUser;
     }
 
@@ -57,17 +51,38 @@ public class AiService {
         TokenStream chat(String message);
     }
 
-    @PostConstruct
-    public void init() {
+    private Assistant createAssistant(User user) {
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
+        String apiKey = OPENAI_API_KEY; // Your API Key
 
-        assistant = AiServices.builder(Assistant.class)
-                .chatLanguageModel(OpenAiChatModel.withApiKey(OPENAI_API_KEY))
+        UserSettings settings = user.getUserSettings();
+        String model = settings != null && settings.getOpenAiModel() != null ? settings.getOpenAiModel() : "gpt-3.5-turbo";
+        Double temperature = settings != null && settings.getTemperature() != null ? settings.getTemperature() : 0.7;
+
+        return AiServices.builder(Assistant.class)
+                .chatLanguageModel(OpenAiChatModel.builder()
+                        .apiKey(apiKey)
+                        .modelName(model)
+                        .temperature(temperature)
+                        .build())
                 .chatMemory(chatMemory)
                 .build();
+    }
 
-        streamingAssistant = AiServices.builder(StreamingAssistant.class)
-                .streamingChatLanguageModel(OpenAiStreamingChatModel.withApiKey(OPENAI_API_KEY))
+    private StreamingAssistant createStreamingAssistant(User user) {
+        ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
+        String apiKey = OPENAI_API_KEY; // Your API Key
+
+        UserSettings settings = user.getUserSettings();
+        String model = settings != null && settings.getOpenAiModel() != null ? settings.getOpenAiModel() : "gpt-3.5-turbo";
+        Double temperature = settings != null && settings.getTemperature() != null ? settings.getTemperature() : 0.7;
+
+        return AiServices.builder(StreamingAssistant.class)
+                .streamingChatLanguageModel(OpenAiStreamingChatModel.builder()
+                        .apiKey(apiKey)
+                        .modelName(model)
+                        .temperature(temperature)
+                        .build())
                 .chatMemory(chatMemory)
                 .build();
     }
@@ -79,13 +94,13 @@ public class AiService {
                 .content()
                 .vector();
 
-        // Perform similarity search
-        List<DocumentSegment> similarSegments = documentSegmentService.findSimilarSegments(user, userMessageEmbedding, 5);
+        // Perform similarity search using ChunkService
+        List<Chunk> similarChunks = chunkService.findSimilarChunks(user, userMessageEmbedding, 2);
 
-        // Build a context string from the retrieved segments
+        // Build a context string from the retrieved chunks
         StringBuilder contextBuilder = new StringBuilder("Relevant Context:\n");
-        for (DocumentSegment segment : similarSegments) {
-            contextBuilder.append(segment.getText()).append("\n---\n");
+        for (Chunk chunk : similarChunks) {
+            contextBuilder.append(chunk.getText()).append("\n---\n");
         }
         log.debug("Context: {}", contextBuilder.toString());
         return contextBuilder.toString();
@@ -99,12 +114,10 @@ public class AiService {
 
         User user = userOpt.get();
 
+        Assistant assistant = createAssistant(user);
+
         Chat chat;
-        if (chatId != null) {
-            chat = chatService.getChat(chatId);
-        } else {
-            chat = chatService.createChat(user);
-        }
+        chat = chatService.getChat(chatId);
 
         // Build context
         String context = buildContext(user, userMessageContent);
@@ -127,17 +140,13 @@ public class AiService {
 
         User user = userOpt.get();
 
+        StreamingAssistant streamingAssistant = createStreamingAssistant(user);
+
         Chat chat;
-        if (chatId != null) {
-            chat = chatService.getChat(chatId);
-        } else {
-            chat = chatService.createChat(user);
-        }
+        chat = chatService.getChat(chatId);
 
         // Build context
         String context = buildContext(user, userMessageContent);
-        log.debug("Context: {}", context);
-
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
         StringBuilder aiResponseBuilder = new StringBuilder();
 
@@ -159,6 +168,9 @@ public class AiService {
 
     public Long createChat() {
         Optional<User> user = authenticatedUser.get();
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not authenticated");
+        }
         Chat chat = chatService.createChat(user.get());
         return chat.getId();
     }

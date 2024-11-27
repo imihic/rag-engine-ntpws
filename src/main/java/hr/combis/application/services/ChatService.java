@@ -3,13 +3,14 @@ package hr.combis.application.services;
 import hr.combis.application.data.model.Chat;
 import hr.combis.application.data.model.User;
 import hr.combis.application.data.repository.ChatRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ChatService {
 
     private final ChatRepository chatRepository;

@@ -1,5 +1,5 @@
 import { ViewConfig } from '@vaadin/hilla-file-router/types.js';
-import { Upload, Notification, Grid, GridColumn, Button } from '@vaadin/react-components';
+import { Upload, Notification, Grid, GridColumn, Button, GridSortColumn } from '@vaadin/react-components';
 import { useState, useEffect } from 'react';
 import { UserEndpoint } from 'Frontend/generated/endpoints';
 import { Icon } from '@vaadin/react-components/Icon';
@@ -91,9 +91,9 @@ export default function DocumentsView() {
       </Notification>
       {/* Uploaded Files Grid */}
       <Grid items={uploadedFiles} style={{ marginTop: '20px', width: '100%' }}>
-        <GridColumn path="name" header="File Name" />
-        <GridColumn path="uploadDate" header="Upload Date" />
-        <GridColumn path="size" header="Size" />
+        <GridSortColumn path="name" header="File Name" />
+        <GridSortColumn path="uploadDate" header="Upload Date" />
+        <GridSortColumn path="size" header="Size" />
         <GridColumn
           header="Actions"
           renderer={({ item }) => (
@@ -106,6 +106,7 @@ export default function DocumentsView() {
             </Button>
           )}
         />
+        <span slot="empty-state">No documents found.</span>
       </Grid>
     </div>
   );

@@ -35,6 +35,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-all</artifactId>
+            <version>0.41</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-vector -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>

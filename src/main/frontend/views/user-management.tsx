@@ -62,7 +62,6 @@ export default function UserManagementView() {
   // @ts-ignore
   return (
     <div className="flex flex-col h-full p-l box-border">
-      <h1 className="text-center">User Management</h1>
       <Grid items={users} className="w-full">
         <GridColumn path="username" header="Username" />
         <GridColumn path="name" header="Name" />

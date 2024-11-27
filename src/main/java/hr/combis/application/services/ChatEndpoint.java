@@ -7,9 +7,8 @@ import hr.combis.application.data.model.Message;
 import hr.combis.application.data.model.SenderType;
 import hr.combis.application.data.model.User;
 import hr.combis.application.security.AuthenticatedUser;
-import hr.combis.application.services.ChatService;
-import hr.combis.application.services.MessageService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.Optional;
 
 @Endpoint
 @AnonymousAllowed
+@Slf4j
 public class ChatEndpoint {
 
     @Autowired

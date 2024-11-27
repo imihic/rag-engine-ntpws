@@ -6,4 +6,5 @@ pipelines:
       jobType: hr.combis.application.pipelines.jobs.DocumentProcessingJob
       stages:
         - documentParsingPipelineStage
-        - semanticSplittingPipelineStage
+        - sentenceSplittingPipelineStage
+        - chunkGroupingPipelineStage
